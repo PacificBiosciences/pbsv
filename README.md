@@ -50,8 +50,11 @@ For each movie, align them with your favorite aligner,
 we recommend [minimap2](https://github.com/lh3/minimap2)
 and [ngmlr](). Example call for `minimap`:
 
-    minimap2 -a -O 5,56 -E 4,1 --secondary=no -z 400,50 -r2k -Y -R "@RG\\tID:sv" hg38.fasta movie1.fasta |\
+    minimap2 -x map-pb -a -O 5,56 -E 4,1 --secondary=no -z 400,50 -r2k -Y -R "@RG\\tID:sv" hg38.fasta movie1.fasta |\
+    samtools sort - |\
     samtools view -bS > movie1.aligned.bam
+
+It is advised to use threading `-@` and `-m` according to your system specifications.
 
 Options explained:
 * `-a` for SAM output
@@ -61,11 +64,11 @@ Options explained:
 * `-Y` do not hard clip
 * `-R` add a read group, required for PacBio BAM files
 
-### Parse
+### Discover
 Each aligned `.bam` file has to be converted to a `.sv.gz` file. For this,
-`pbsv2 parse` requires three arguments:
+`pbsv2 discover` requires three arguments:
 
-    pbsv2 parse movie1.aligned.bam HG0733 movie1.sv.gz
+    pbsv2 discover movie1.aligned.bam HG0733 movie1.sv.gz
 
 The first argument is the aligned `.bam` input file, followed by the bio sample name,
 and third is the output `.sv.gz` file name. Multiple `.sv.gz` can have the share
@@ -81,9 +84,33 @@ with the used reference in `.fasta` format. For this,
     pbsv2 call hg38.fasta *.sv.gz mysample.vcf
 
 ### Speed ups
+#### Less IO
 In order to minimize IO, stream `pbsv2 filter` into your aligner:
 
     minimap2 ADDITIONAL_OPTIONS hg38.fasta <(pbsv2 filter movie1.subreads.bam) | samtools view -bS > movie1.aligned.bam
+
+#### Parallel chromosome processing
+For this, please get `pbindex` either
+from the SMRT Link installation / tarball or compile it from [pbbam](https://github.com/PacificBiosciences/pbbam).
+Next, after the alignment, generate an index `.pbi` file for each movie BAM:
+
+    pbindex movie1.aligned.bam
+
+Instead of generating one large `.sv.gz` file for each movie, split it by chromosome:
+
+    for i in {chr1,chr2,chr3,chr4,chr5,...};\
+        do pbsv2 discover movie1.aligned.bam HG0733 movie1.$i.sv.gz;\
+    done
+
+Jointly call all movies per chromosome on different servers:
+
+    pbsv2 call hg38.fasta *.chr1.sv.gz mysample.chr1.vcf
+    pbsv2 call hg38.fasta *.chr2.sv.gz mysample.chr2.vcf
+    pbsv2 call hg38.fasta *.chr3.sv.gz mysample.chr3.vcf
+    ...
+
+Merge all VCF files with your favorite tool and you are done.
+`pbsv2 merge-vcf` will follow in a future version.
 
 ## DISCLAIMER
 
