@@ -15,18 +15,20 @@ Cohort-scale joint calling is a native feature, allowing identification
 of low-frequency ALT alleles caused by sampling bias in low-coverage samples.
 
 ## Availability
-The latest pre-release, developers-only linux binaries can be found under
-[releases](https://github.com/PacificBiosciences/pbsv/releases).
+The latest pre-release, developers-only linux binaries can be installed via [bioconda](https://bioconda.github.io/).
+All necessary dependencies will also be installed automatically.
+
+    conda install pbsv
+
 These binaries are not ISO compliant.
 For research only.
 Not for use in diagnostics procedures.
 
 Official support is only provided for official and stable SMRT Link builds
 provided by PacBio.
+
 Unofficial support for binary pre-releases is provided via github issues,
 not via mail to developers.
-
-Distribution via bioconda is planned.
 
 Binaries require **SSE4.1 CPU support**; CPUs after 2008 (Penryn) include it.
 
