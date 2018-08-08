@@ -37,6 +37,7 @@ Binaries require **SSE4.1 CPU support**; CPUs after 2008 (Penryn) include it.
  * Translocations between contigs or ≥ 100 kb on same contig
 
 ## Changelog
+ * 2.0.0: Drop RC for conda release
  * 2.0.0-RC2: First public release candidate for SMRT Link 6.0.0
 
 ## Workflow
