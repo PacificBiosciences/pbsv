@@ -1,166 +1,124 @@
 <h1 align="center"><img width="300px" src="img/sv2.png"/></h1>
-<h1 align="center">pbsv v2</h1>
-<p align="center">SMRT Structural Variation Caller</p>
+<h1 align="center">pbsv</h1>
+<p align="center">PacBio structural variant (SV) calling and analysis tools</p>
 
 ***
 
-## Scope
-*pbsv version 2* contains the newest tools to identify and analyze
-structural variations in PacBio single-molecule sequencing data.
-Starting in SMRT Link v6.0.0, those tools power the
-*Structural Variation GUI-based analysis* application.
-Current version supports insertion and deletion calls down to 20 bp, inversions,
-and translocations, [more info](#supported-structural-variation-sizes).
-Cohort-scale joint calling is a native feature, allowing identification
-of low-frequency ALT alleles caused by sampling bias in low-coverage samples.
+`pbsv` is a suite of tools to call and analyze structural variants
+in diploid genomes from PacBio single molecule real-time sequencing (SMRT) reads.
+The tools power the *Structural Variant Calling* analysis workflow in
+PacBio's SMRT Link GUI.
+
+`pbsv` calls insertions, deletions, inversions, and translocations.
+Both single-sample calling and joint (multi-sample) calling are provided. `pbsv` is most
+effective for:
+* insertions 20 bp to 5 kb
+* deletions 20 bp to 100 kb
+* inversions 200 bp to 5 kb
+* translocations between different chromosomes or further than 100kb apart on a single chromosome
 
 ## Availability
-The latest pre-release, developers-only linux binaries can be installed via [bioconda](https://bioconda.github.io/).
-All necessary dependencies will also be installed automatically.
+Stable versions of `pbsv` with official support from PacBio are only
+available through [SMRT Link releases](https://www.pacb.com/support/software-downloads/).
+* SMRT Link 5.1.0 includes `pbsv` 1.0.0
+
+The current pre-release version of the `pbsv` binary is available for Linux from
+[bioconda](https://bioconda.github.io/).  All necessary dependencies are installed
+automatically.  A modern (post-2008) CPU with support for [SSE4.1 instructions](https://en.wikipedia.org/wiki/SSE4#SSE4.1) is required.
 
     conda install pbsv
 
-These binaries are not ISO compliant.
-For research only.
-Not for use in diagnostics procedures.
-
-Official support is only provided for official and stable SMRT Link builds
-provided by PacBio.
-
-Unofficial support for binary pre-releases is provided via github issues,
-not via mail to developers.
-
-Binaries require **SSE4.1 CPU support**; CPUs after 2008 (Penryn) include it.
-
-## Supported Structural Variation Sizes
- * Deletions 100 kb ≥ x ≥ 20 bp
- * Insertions 5 kb ⪆ x ≥ 20 bp
- * Inversions ≥ 200 bp
- * Translocations between contigs or ≥ 100 kb on same contig
-
-## Changelog
- * 2.0.0: Drop RC for conda release
- * 2.0.0-RC2: First public release candidate for SMRT Link 6.0.0
-
 ## Workflow
-### Overview
-
 <p align="center"><img width="700px" src="img/pbsv-stage-workflow.png"/></p>
 
-`pbsv` accepts aligned reads in the BAM format as input.
-The general workflow looks as following, align each movie, convert each `.bam`
-file to an intermediate sparse sv representation `.svsig.gz` using `pbsv discover`,
-and then jointly call all `*.svsig.gz` files together with `pbsv call` to one
-`.vcf` file.
+The general `pbsv` workflow is:
+1. Align PacBio reads to a reference genome, per movie. (`.subreads.bam` to `.bam`)
+2. Discover signatures of structural variation, per movie or per sample. (`.bam` to `.svsig.gz`)
+3. Call structural variants and assign genotypes, all samples. (`.svsig.gz` to `.vcf`)
 
-### Convert movie to fasta
-For each movie, we are extracting subreads from unaligned `.bam` files to
-`.fasta` files. The trick employed here, only take ONE subread per ZMW, possibly
-one that spans the full-length molecule:
-
-```sh
-> pbsv fasta movie1.subreads.bam > movie1.fasta
-```
-
-### Alignment
-For each movie, align them with your favorite aligner,
-we recommend [minimap2](https://github.com/lh3/minimap2)
-and [ngmlr](https://github.com/philres/ngmlr). Example call for `minimap2`:
+### 1. Align PacBio reads to a reference genome
+For each movie (`.subreads.bam`), extract subreads with `pbsv fasta` and align
+to a reference genome (`ref.fa`) with [`minimap2`](https://github.com/lh3/minimap2) or
+[`ngmlr`](https://github.com/philres/ngmlr).
 
 ```sh
-> minimap2 -x map-pb -a --eqx -L -O 5,56 -E 4,1 -B 5 --secondary=no -z 400,50 -r 2k -Y -R "@RG\tID:rg1a\tSM:sample1" ref.fa - |
-  samtools sort > ref.movie1.bam
-> samtools index ref.movie1.bam
+pbsv fasta movie1.subreads.bam |
+    minimap2 -x map-pb -a --eqx -L -O 5,56 -E 4,1 -B 5 --secondary=no -z 400,50 -r 2k -Y -R "@RG\tID:rg1a\tSM:sample1" ref.fa - |
+    samtools sort > ref.movie1.bam
+samtools index ref.movie1.bam
 ```
 
-It is advised to use threading `-@` and `-m` according to your available system
-resources.
+It is recommended to use multithreading (`-t` for `minimap2`, `-@` for `samtools`).
 
-Options explained:
-* `-x map-pb` recommended preset with k-mer, window, and hpc settings
-* `-a` for SAM output
-* `--eqx` use `X`/`=` PacBio compliant extended cigars
-* `-L` support long alignments
+The recommended `minimap2` options are:
+* `-x map-pb` provides preset seeding parameters optimized for PacBio reads
+* `-a` produces SAM output (**required** for `pbsv`)
+* `--eqx` uses `X`/`=` extended CIGAR strings
+* `-L` supports long alignments
 * `-O 5,56 -E 4,1 -B 5` approximates the convex gap costs of `ngmlr`
-* `--secondary=no` Only primary hits are of interest
+* `--secondary=no` outputs only primary and supplementary alignments
 * `-z 400,50` enables alignment of short inversions
-* `-r 2k` increase bandwidth to not break indels
-* `-Y` do not hard clip
-* `-R` add a read group with the biosample name
+* `-r 2k` increases alignment bandwidth to span large insertions and deletions
+* `-Y` prevents hard clipping (**required** for `pbsv`)
+* `-R` defines a read group with the sample name (**required** for joint calling with `pbsv`)
 
-The biosample name, stored in tag `SM` of the readgroup, enables association
-of aligned records to a particular sample. If this tag is used correctly,
-joint calling is done implicit from here on.
+The sample name, stored in the `SM` tag of the read groups, associates
+aligned reads with a particular sample.  It it required for downstream
+joint calling.
 
-### Discover
-Each aligned `.bam` file has to be converted to a `.svsig.gz` file. For this,
-`pbsv discover` requires two arguments:
+### 2. Discover signatures of structural variation
 
-```sh
-> pbsv discover movie1.aligned.bam movie1.svsig.gz
-```
-
-The first argument is the aligned `.bam` input file
-and second is the output `.svsig.gz` file name. Multiple `.svsig.gz` files may
-share the same biosample name.
-
-### Call
-After all `.svsig.gz` files have been created, they can be jointly called, together
-with the used reference in `.fasta` format. For this,
-`pbsv call` requires at least three arguments, different ways to call it:
+For each aligned BAM or set of aligned BAMs for a single sample, identify signatures
+of structural variation.  This reduces all aligned reads to those that are relevant
+to calling structural variants.  The signatures are stored in a `.svsig.gz` file.
 
 ```sh
-> pbsv call hg38.fasta movie1.svsig.gz mysample.vcf
-> pbsv call hg38.fasta movie1.svsig.gz movie2.svsig.gz movie3.svsig.gz mysample.vcf
-> pbsv call hg38.fasta *.svsig.gz mysample.vcf
-> pbsv call hg38.fasta svsigs.fofn mysample.vcf
+pbsv discover ref.movie1.bam ref.sample1.svsig.gz
+pbsv discover ref.movie2.bam ref.sample2.svsig.gz
 ```
 
-whereas
+Sample names are transferred from the `RG` headers to the `.svsig.gz` file.
+
+### 3. Call structural variants and assign genotypes
+
+Call structural variants from structural variant signatures, jointly for all
+samples of interest. One or more `.svsig.gz` files are accepted, including multiple
+`.svsig.gz` for a single sample and/or `svsig.gz` for multiple samples.
 
 ```sh
-> cat svsigs.fofn
-movie1.svsig.gz
-movie2.svsig.gz
-movie3.svsig.gz
+pbsv call ref.fa ref.sample1.svsig.gz ref.sample2.svsig.gz ref.var.vcf
 ```
 
-### Speed ups
-#### Less IO
-In order to minimize IO, stream `pbsv fasta` into your aligner:
+Variant calls for all samples are output in a single `.vcf` file.
+
+### Parallel processing per chromosome
+For large genomes with high sequencing coverage, it is recommended to process
+chromosomes separately.  After aligning each movie:
+
+#### Generate separate `.svsig.gz` files per chromosome
 
 ```sh
-> pbsv fasta movie1.subreads.bam | minimap2 ADDITIONAL_OPTIONS hg38.fasta | samtools sort - > hg38.movie1.bam
+for i in {chr1,chr2,chr3,chr4,chr5,...}; do
+    pbsv discover --region $i hg38.movie1.bam hg38.sample1.$i.svsig.gz
+done
 ```
 
-#### Parallel chromosome processing
-Instead of generating one large `.svsig.gz` file for each movie, split it by chromosome.
+#### Call insertions, deletions, and inversion per chromosome
+```sh
+for i in {chr1,chr2,chr3,chr4,chr5,...}; do
+    pbsv call --types INS,DEL,INV hg38.fa hg38.sample1.${i}.svsig.gz hg38.${i}.ins+del+inv.vcf
+done
+```
 
-For this, each aligned `.bam` file needs a companion `.bam.pbi` or `.bam.bai` file.
-PacBio index files `.pbi` can be created with `pbindex` and `.bai` files can
-be generated using `samtools index`.
-
-This enables calling `discover` on a single chromosome.
+#### Call translocations for whole genome
+Translocation (breakend) calling requires all chromosomes.  It is not currently supported
+to call translocations separately per chromosome.
 
 ```sh
-> for i in {chr1,chr2,chr3,chr4,chr5,...};\
-    do pbsv discover hg38.movie1.bam hg38.movie1.$i.svsig.gz -r $i;\
-  done
+pbsv call --types BND hg38.fa hg38.sample1.*.svsig.gz hg38.*.bnd.vcf
 ```
 
-Jointly call all movies per chromosome on different servers:
-
-```sh
-> pbsv call hg38.fasta *.chr1.svsig.gz hg38.mysample.chr1.vcf
-> pbsv call hg38.fasta *.chr2.svsig.gz hg38.mysample.chr2.vcf
-> pbsv call hg38.fasta *.chr3.svsig.gz hg38.mysample.chr3.vcf
-> ...
-```
-
-Merge all VCF files with your favorite tool and you are done.
-`pbsv merge-vcf` will follow in a future version.
-
-## SV calling explained
+## Algorithm Overview and Advanced Parameters
 ### Deletions
 <p align="center"><img width="700px" src="img/pbsv-deletion-workflow.png"/></p>
 
@@ -195,8 +153,8 @@ SV Signature Cluster Options:
 <p align="center"><img width="800px" src="img/pbsv-insertion-criteria.png"/></p>
 
 An inversion signature is detected if a single read is split into three
-primary alignments with different orientations / strands, either `+-+` or `-+-`.
-The maximum reference gap or overlap between consecutive alignments can be
+alignments with different orientations / strands, either `+-+` or `-+-`.
+The maximum permitted reference gap or overlap between consecutive alignments is
 configured in `pbsv call`:
 
 ```
@@ -204,93 +162,53 @@ Alignment Connection Options:
  --max-inversion-gap   Do not link inverted alignments with > N bp gap or overlap with flanking alignments. [1000]
 ```
 
-Clustering is performed on the inverted segment and uses the same criteria as
-deletion clustering.
+Clustering is performed on the inverted segment and uses the same criteria as deletion clustering.
 
-The VCF call marks the most likely position and size of the inverted segment,
-as shown in this IGV screenshot:
+The VCF call marks the most likely position and size of the inverted segment, as shown in this IGV screenshot:
 <p align="center"><img width="800px" src="img/pbsv-inversion-igv.png"/></p>
 
 ### Translocations
-Translocations are identified using breakends of individual reads.
-All four breakend combinations are supported:
+Translocations are identified using breakends of individual reads.  All four breakend combinations are supported:
 <p align="center"><img width="700px" src="img/pbsv-breakends.png"/></p>
 
-Breakends from VCF can be converted to bedpe format and used in visualization
-tools like circa
-
-```sh
-> cat hg38.skbr3.vcf | grep -v '^@' | grep 'BND' | cut -f1,2,5 | \
-  tr -d 'ACGTN[]' | tr ':' '\t' | sort -u | \
-  awk '{ print $0; print $3 "\t" $4 "\t" $1 "\t" $2; }' | sort -u  | \
-  awk '($1<$3 || ($1 == $3 && $2<$4)) { print; }' | sort -k1,1 -k2,2g | \
-  awk '{ print $1 "\t" $2 "\t" $2+1 "\t" $3 "\t" $4 "\t" $4+1; } BEGIN { print "#chrom1\tchromStart1\tchromEnd1\tchrom2\tchromStart2\tchromEnd2";}' \
-  > hg38.skbr3.bedpe
-```
-
-<p align="center"><img width="500px" src="img/pbsv-translocation-circa.png"/></p>
-
 ### Calling and Genotyping
-An identified SV is being called if it passes following coverage thresholds:
-
-* at least supported by 2 reads total across samples,
-* at least supported by 2 reads in every sample,
-* at least supported by 20% of reads in every sample,
-
-and assigned to a non-reference genotype if supported by at least 1 read.
-
-Respective `pbsv call` options:
-
-```
-Call Options:
-  --call-min-reads-all-samples     Ignore calls supported by < N reads total across samples. [2]
-  --call-min-reads-one-sample      Ignore calls supported by < N reads in every sample. [2]
-  --call-min-read-perc-one-sample  Ignore calls supported by < P% of reads in every sample. [20]
-
-Genotyping:
-  --gt-min-reads                   Minimum supporting reads to assign a sample a non-reference genotype. [1]
-```
+An variant is output if it passes all of the following criteria:
+* supported by at least `--call-min-reads-all-samples [2]` reads total across samples,
+* supported by at least `--call-min-reads-one-samples [2]` in a sample,
+* supported by at least `--call-min-read-per-one-sample [20]` percent of reads in a sample
+* assigned a non-reference genotype in at least one sample
+** A sample is assigned a non-reference genotype for a variant if at least `--gt-min-reads [1]` reads
+   support the variant.
 
 ### Filtering
-The VCF filter column can be
+The VCF filter column is
 
 1) **PASS**
-2) **NearReferenceGap** (Variant is near (< 1000 bp) from a gap (run of >= 50 Ns) in the reference assembly)
-3) **Decoy** (Variant involves a decoy sequence, chromosome name contains `decoy`, `hs37d5`, or `hs38d1`)
+2) **NearReferenceGap**: variant is near (< `--filter-near-reference-gap [1000]`) from a gap (run of >= 50 Ns in the reference assembly)
+3) **Decoy**: variant involves a decoy sequence, where the chromosome name contains `decoy`, `hs37d5`, or `hs38d1`
 
-Respective `pbsv call` options:
+## Known Issues
+`pbsv` is under active development and will continue to improve in future release.  Currently known issues and limitations are:
 
-```
-Variant Filtering Options:
-  --min-N-in-gap                   Consider >= N consecutive "N" bp as a reference gap. [50]
-  --filter-near-reference-gap      Flag variants < N bp from a gap as "NearReferenceGap". [1000]
-```
+* Sensitivity is limited for insertions > 5kb due to difficulty aligning with current minimap2 parameters.
+* Large deletions are sometimes called multiple times.
+* The REF allele sequence is shifted by one base for insertions and deletions and does not match the reported genomic position.
+* The REF allele representation for deletions is one base too short.  The reported POS and SVLEN are correct.
+* The output VCF is not properly sorted in edge cases.
 
 ## FAQ
 
-### Known Limitations (Under Active Development)
- * Insertions ⪆ 5kb are hard to align and currently not support by minimap2
- * Large deletions may be called multiple times
- * Deletion VCF REF sequence is missing one base
- * VCF may not be properly sorted in edge cases
+### To where do I report bugs and ask questions about the pre-release version of `pbsv`?
+Report bugs and questions using GitHub Issues.  The pre-release version of `pbsv` is not
+officially supported, but feedback from users is appreciated and will be addressed as possible.
 
-### Possible Future Features (Unsorted)
- * Copy number variations and duplications
- * Large insertions (≫ read length)
- * Visualization to confirm variant sets
- * Intersection tools to compare variant sets
- * Improved tandem annotation, loss/gain of N copies
- * Improved annotation of insertion types
- * Quality scores
-
-### Can I use multiple biosamples in one aligned.bam?
-No. Currently, we support one biosample per BAM file.
-
-### Can I perform translocation calling while processing chromosomes separately?
-No. If you split your alignment files into individual `.svsig.gz` files,
-one per chromosome, only following SV types are allowed `--types INS,DEL,INV`.
+## Change Log
+ * 2.0.0: Drop RC for conda release
+ * 2.0.0-RC2: First public release candidate for SMRT Link 6.0.0
 
 
 ## DISCLAIMER
 
 THIS WEBSITE AND CONTENT AND ALL SITE-RELATED SERVICES, INCLUDING ANY DATA, ARE PROVIDED "AS IS," WITH ALL FAULTS, WITH NO REPRESENTATIONS OR WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, ANY WARRANTIES OF MERCHANTABILITY, SATISFACTORY QUALITY, NON-INFRINGEMENT OR FITNESS FOR A PARTICULAR PURPOSE. YOU ASSUME TOTAL RESPONSIBILITY AND RISK FOR YOUR USE OF THIS SITE, ALL SITE-RELATED SERVICES, AND ANY THIRD PARTY WEBSITES OR APPLICATIONS. NO ORAL OR WRITTEN INFORMATION OR ADVICE SHALL CREATE A WARRANTY OF ANY KIND. ANY REFERENCES TO SPECIFIC PRODUCTS OR SERVICES ON THE WEBSITES DO NOT CONSTITUTE OR IMPLY A RECOMMENDATION OR ENDORSEMENT BY PACIFIC BIOSCIENCES.
+
+FOR RESEARCH USE ONLY. NOT FOR USE IN DIAGNOSTICS PROCEDURES.
