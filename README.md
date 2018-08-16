@@ -202,6 +202,9 @@ The VCF filter column is
 Report bugs and questions using GitHub Issues.  The pre-release version of `pbsv` is not
 officially supported, but feedback from users is appreciated and will be addressed as possible.
 
+### Where can I find an example dataset to try `pbsv`?
+10-fold coverage of the Genome in a Bottle sample HG002 is [available](https://downloads.pacbcloud.com/public/dataset/HG002/Sequel-201804/).
+
 ## Change Log
  * 2.0.0: Drop RC for conda release
  * 2.0.0-RC2: First public release candidate for SMRT Link 6.0.0
