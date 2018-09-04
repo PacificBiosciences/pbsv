@@ -18,15 +18,10 @@ effective for:
 * translocations between different chromosomes or further than 100kb apart on a single chromosome
 
 ## Availability
-Stable versions of `pbsv` with official support from PacBio are only
-available through [SMRT Link releases](https://www.pacb.com/support/software-downloads/).
-* SMRT Link 5.1.0 includes `pbsv` 1.0.0
+Latest version can be installed via bioconda package `pbsv`.
 
-The current pre-release version of the `pbsv` binary is available for Linux from
-[bioconda](https://bioconda.github.io/).  All necessary dependencies are installed
-automatically.  A modern (post-2008) CPU with support for [SSE4.1 instructions](https://en.wikipedia.org/wiki/SSE4#SSE4.1) is required.
-
-    conda install pbsv
+Please refer to our [official pbbioconda page](https://github.com/PacificBiosciences/pbbioconda)
+for information on Installation, Support, License, Copyright, and Disclaimer.
 
 ## Workflow
 <p align="center"><img width="700px" src="img/pbsv-stage-workflow.png"/></p>
@@ -199,11 +194,14 @@ The VCF filter column is
 ## FAQ
 
 ### To where do I report bugs and ask questions about the pre-release version of `pbsv`?
-Report bugs and questions using GitHub Issues.  The pre-release version of `pbsv` is not
-officially supported, but feedback from users is appreciated and will be addressed as possible.
+Please refer to our [official pbbioconda page](https://github.com/PacificBiosciences/pbbioconda)
+to report bugs and ask questions.
 
 ### Where can I find an example dataset to try `pbsv`?
 10-fold coverage of the Genome in a Bottle sample HG002 is [available](https://downloads.pacbcloud.com/public/dataset/HG002/Sequel-201804/).
+
+### The binary does not work on my linux system!
+A modern (post-2008) CPU with support for [SSE4.1 instructions](https://en.wikipedia.org/wiki/SSE4#SSE4.1) is required.
 
 ## Change Log
  * 2.0.0: Drop RC for conda release
