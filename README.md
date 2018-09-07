@@ -93,7 +93,7 @@ chromosomes separately.  After aligning each movie:
 #### Generate separate `.svsig.gz` files per chromosome
 
 ```sh
-for i in {chr1,chr2,chr3,chr4,chr5,...}; do
+for i in $(samtools view -H hg38.movie1.bam | grep '^@SQ' | cut -f2 | cut -d':' -f2); do
     pbsv discover --region $i hg38.movie1.bam hg38.sample1.$i.svsig.gz
 done
 ```
