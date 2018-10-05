@@ -204,6 +204,7 @@ to report bugs and ask questions.
 A modern (post-2008) CPU with support for [SSE4.1 instructions](https://en.wikipedia.org/wiki/SSE4#SSE4.1) is required.
 
 ## Change Log
+ * 2.0.2: Fix rare `pbsv call` abort, because of missing coverage
  * 2.0.0: Drop RC for conda release
  * 2.0.0-RC2: First public release candidate for SMRT Link 6.0.0
 
