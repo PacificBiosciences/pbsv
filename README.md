@@ -198,7 +198,7 @@ Please refer to our [official pbbioconda page](https://github.com/PacificBioscie
 to report bugs and ask questions.
 
 ### Where can I find an example dataset to try `pbsv`?
-10-fold coverage of the Genome in a Bottle sample HG002 is [available](https://downloads.pacbcloud.com/public/dataset/HG002/Sequel-201804/).
+10-fold coverage of the Genome in a Bottle sample HG002 is [available](https://downloads.pacbcloud.com/public/dataset/HG002/Sequel-201810/).
 
 ### The binary does not work on my linux system!
 A modern (post-2008) CPU with support for [SSE4.1 instructions](https://en.wikipedia.org/wiki/SSE4#SSE4.1) is required.
