@@ -312,9 +312,6 @@ function sumsv() { cat $1 | grep ':' | tr -d ',' |sed "s/^[ \t]*//"| tr -d '"' |
 cat <(echo -e "Run\tF1\tPrecision\tRecall\tFP+FN")\
     <(for i in testrun; do printf $i"\t";sumsv $i/summary.txt;done) |\
     sed 's/testrun\///g;' | sort -k 2 -n | column -t
-
-Run       F1      Precision  Recall  FP+FN
-testrun   0.9557  0.9621     0.9494  850
 ```
 
 ## Known Issues
