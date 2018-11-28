@@ -216,7 +216,7 @@ sed -i '/^[^>]/ y/BDEFHIJKLMNOPQRSUVWXYZbdefhijklmnopqrsuvwxyz/NNNNNNNNNNNNNNNNN
 
 5) Download hg19 tandem repeat annotations:
 ```sh
-curl -s https://github.com/PacificBiosciences/pbsv/blob/master/human_hs37d5.trf.bed > ref/human_hs37d5.trf.bed
+curl -s https://raw.githubusercontent.com/PacificBiosciences/pbsv/master/annotations/human_hs37d5.trf.bed > ref/human_hs37d5.trf.bed
 ```
 
 6) Download all `.fastq` files:
