@@ -183,11 +183,6 @@ The VCF filter column is
 4) **NearContigEnd**: variant is near (< `--filter-near-contig-end [1K]`) from a contig end
 5) **InsufficientStrandEvidence**: variant is not supported by at least (`--call-min-reads-per-strand-all-samples [1]`) reads in forward and reverse orientation
 
-## Known Issues
-`pbsv` is under active development and will continue to improve in future release.  Currently known issues and limitations are:
-
-* Some LINE elements are not detected due to difficulties in alignment. This will improve in upcoming versions of `pbmm2`.
-
 ## Performance benchmarks
 Using the [publicly available HG002 15kb CCS dataset](https://bit.ly/2RW1b3I),
 we are tracking `pbsv` performance with respect to the genome in a bottle annotation version 0.6.
@@ -212,17 +207,16 @@ git clone https://github.com/spiralgenetics/truvari
 (cd truvari; git reset --hard 600b4ed7)
 ```
 
-4) Download hg19 reference:
+4) Download hg19 reference with decoys and map non-ACGT characters to N:
 ```sh
-curl -s ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/human_g1k_v37.fasta.gz > ref/human_g1k_v37.fasta.gz
-gunzip ref/human_g1k_v37.fasta.gz
+curl -s ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/phase2_reference_assembly_sequence/hs37d5.fa.gz > ref/human_hs37d5.fasta.gz
+gunzip ref/human_hs37d5.fasta.gz
+sed -i '/^[^>]/ y/BDEFHIJKLMNOPQRSUVWXYZbdefhijklmnopqrsuvwxyz/NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN/' human_hs37d5.fasta
 ```
 
-5) Download hg19 tandem repeat annotations and concat:
+5) Download hg19 tandem repeat annotations:
 ```sh
-curl -s  http://hgdownload.cse.ucsc.edu/goldenpath/hg19/bigZips/chromTrf.tar.gz > ref/chromTrf.tar.gz
-tar xzf ref/chromTrf.tar.gz -C ref
-cat ref/trfMaskChrom/*.bed > ref/hg19_trf.bed
+curl -s https://github.com/PacificBiosciences/pbsv/blob/master/human_hs37d5.trf.bed > ref/human_hs37d5.trf.bed
 ```
 
 6) Download all `.fastq` files:
@@ -270,7 +264,7 @@ curl -s ftp://ftp-trace.ncbi.nlm.nih.gov/giab/ftp/data/AshkenazimTrio/HG002_NA24
 
 6) Index reference
 ```sh
-pbmm2 index ref/human_g1k_v37.fasta ref/human_g1k_v37.mmi --preset CCS
+pbmm2 index ref/human_hs37d5.fasta ref/human_hs37d5.mmi --preset CCS
 ```
 
 ### Process data
@@ -279,7 +273,7 @@ pbmm2 index ref/human_g1k_v37.fasta ref/human_g1k_v37.mmi --preset CCS
 for i in fastqs/*.fastq; do
     FILENAME="${i#*fastqs/}"
     FILEPREFIX="${FILENAME%.*}"
-    pbmm2 align $i ref/human_g1k_v37.mmi "alns/hg19.${FILEPREFIX}.bam" --preset CCS \
+    pbmm2 align $i ref/human_hs37d5.mmi "alns/hg19.${FILEPREFIX}.bam" --preset CCS \
                 --sort --rg '@RG\tID:${FILEPREFIX}' --sample HG2
 done
 ```
@@ -289,13 +283,13 @@ done
 for i in alns/*.bam; do
     FILENAME="${i#*alns/}"
     FILEPREFIX="${FILENAME%.*}"
-    pbsv discover $i "svsigs/hg19.${FILEPREFIX}.svsig.gz" --tandem-repeats ref/hg19_trf.bed
+    pbsv discover $i "svsigs/hg19.${FILEPREFIX}.svsig.gz" --tandem-repeats ref/human_hs37d5.trf.bed
 done
 ```
 
 9) Call and polish SVs
 ```sh
-pbsv call ref/human_g1k_v37.fasta svsigs/*.svsig.gz hg2.pbsv.vcf --log-level INFO -z 1G\
+pbsv call ref/human_hs37d5.fasta svsigs/*.svsig.gz hg2.pbsv.vcf --log-level INFO -z 1G\
           --call-min-read-perc-one-sample 10
 bgzip hg2.pbsv.vcf
 tabix hg2.pbsv.vcf.gz
@@ -303,8 +297,8 @@ tabix hg2.pbsv.vcf.gz
 
 10) Compare to ground truth
 ```sh
-truvari/truvari.py -f ref/human_g1k_v37.fasta -b  giab/HG002_SVs_Tier1_v0.6.vcf.gz\
-                   --includebed giab/HG002_SVs_Tier1_v0.6.bed -o truvari --passonly\
+truvari/truvari.py -f ref/human_hs37d5.fasta -b  giab/HG002_SVs_Tier1_v0.6.vcf.gz\
+                   --includebed giab/HG002_SVs_Tier1_v0.6.bed -o testrun --passonly\
                    --giabreport -r 1000 -p 0.01 -c hg2.pbsv.vcf.gz
 ```
 
@@ -316,12 +310,17 @@ function sumsv() { cat $1 | grep ':' | tr -d ',' |sed "s/^[ \t]*//"| tr -d '"' |
                      { str=a[1,j]; for(i=2; i<=NR; i++){ str=str" "a[i,j]; } print str } }' |\
                    tail -n 1 | awk '{ printf "%1.4f\t%1.4f\t%1.4f\t%10.0f\n", $2,$4,$11,$1+$8 }';}
 cat <(echo -e "Run\tF1\tPrecision\tRecall\tFP+FN")\
-    <(for i in truvari; do printf $i"\t";sumsv $i/summary.txt;done) |\
-    sed 's/truvari\///g;' | sort -k 2 -n | column -t
+    <(for i in testrun; do printf $i"\t";sumsv $i/summary.txt;done) |\
+    sed 's/testrun\///g;' | sort -k 2 -n | column -t
 
 Run       F1      Precision  Recall  FP+FN
-truvari   0.9557  0.9621     0.9494  850
+testrun   0.9557  0.9621     0.9494  850
 ```
+
+## Known Issues
+`pbsv` is under active development and will continue to improve in future release.  Currently known issues and limitations are:
+
+* Some LINE elements are not detected due to difficulties in alignment. This will improve in upcoming versions of `pbmm2`.
 
 ## FAQ
 
