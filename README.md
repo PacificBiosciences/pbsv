@@ -24,7 +24,7 @@ Please refer to our [official pbbioconda page](https://github.com/PacificBioscie
 for information on Installation, Support, License, Copyright, and Disclaimer.
 
 ## Latest Version
-Version **2.1.0**: [Full changelog here](#full-changelog)
+Version **2.1.1**: [Full changelog here](#full-changelog)
 
 ## Workflow
 <p align="center"><img width="700px" src="img/pbsv-stage-workflow.png"/></p>
@@ -333,7 +333,12 @@ If you get `Illegal instruction` upon execution of `pbsv`, then your CPU is not 
 A modern (post-2008) CPU with support for [SSE4.1 instructions](https://en.wikipedia.org/wiki/SSE4#SSE4.1) is required.
 
 ## Full Changelog
- * **2.1.0**:
+ * **2.1.1**:
+   * Improve error output if reference and svsig contigs do not match
+   * Add `IMPRECISE` to VCF header
+   * Separate filter with semicolon
+
+ * 2.1.0:
    * Algorithmic improvements to increase recall and sensitivity across all SV lengths
    * Add `SAC` Stranded Allel Counts for subread input
    * Remove `pbsv fasta` and rely on `pbmm2` input
