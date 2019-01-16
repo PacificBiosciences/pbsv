@@ -41,10 +41,10 @@ reference genome (`ref.fa`).
 
 ```sh
 #For .subreads.bam input:
-pbmm2 align movie1.subreads.bam ref.fa ref.movie1.bam --sort --sample 'sample1' --median-filter
+pbmm2 align ref.fa movie1.subreads.bam ref.movie1.bam --sort --sample 'sample1' --median-filter
 
 #For .ccs.fq input:
-pbmm2 align movie1.ccs.fq ref.fa ref.movie1.bam --sort --rg '@RG\tID:movie1\tSM:sample1' --preset CCS
+pbmm2 align ref.fa movie1.ccs.fq ref.movie1.bam --sort --rg '@RG\tID:movie1\tSM:sample1' --preset CCS
 ```
 
 The sample name, stored in the `SM` tag of the read groups, associates
@@ -273,7 +273,7 @@ pbmm2 index ref/human_hs37d5.fasta ref/human_hs37d5.mmi --preset CCS
 for i in fastqs/*.fastq; do
     FILENAME="${i#*fastqs/}"
     FILEPREFIX="${FILENAME%.*}"
-    pbmm2 align $i ref/human_hs37d5.mmi "alns/hg19.${FILEPREFIX}.bam" --preset CCS \
+    pbmm2 align ref/human_hs37d5.mmi $i "alns/hg19.${FILEPREFIX}.bam" --preset CCS \
                 --sort --rg '@RG\tID:${FILEPREFIX}' --sample HG2
 done
 ```
