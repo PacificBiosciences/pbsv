@@ -266,6 +266,27 @@ For Genome in a Bottle sample HG002:
 If you get `Illegal instruction` upon execution of `pbsv`, then your CPU is not supported.
 A modern (post-2008) CPU with support for [SSE4.1 instructions](https://en.wikipedia.org/wiki/SSE4#SSE4.1) is required.
 
+### Why do I have to use `--median-filter` for CLR data?
+I'm not sure how deep your knowledge goes for the PacBio technology.
+You might know that each ZMW contains a polymerase that sequences one
+SMRTbell, which consists of your piece of DNA, we call insert, and PacBio's
+hairpin adapters. This SMRTbell is being processed once the
+acquisition starts and ends when either the polymerase dies or the
+acquisition ends. Depending how large your insert and how long the
+movie time is, it might happen that you read the same molecule
+multiple times. In this case, a ZMW has multiple subreads (also called
+CLR), originating from the same insert, from the forward and reverse
+strands. If we were to align all subreads to the genome and call SVs,
+it will happen that we call SVs that have support from multiple
+subreads, but all of them are from the same ZMW. In NGS you would call
+that PCR duplicates or some would refer to them as technical replicates.
+One does not want to account evidence more than once per ZMW aka per
+molecule. 
+The median filter picks one subread per ZMW, to be precise the subread
+of median length, to have exactly one evidence per molecule. If you
+don't use it, you will get false positive SV calls and the genotypes
+will be wrong.
+
 ## Full Changelog
  * **2.2.0**:
    * Add duplications and copy number variations
