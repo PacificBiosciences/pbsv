@@ -25,7 +25,7 @@ Please refer to our [official pbbioconda page](https://github.com/PacificBioscie
 for information on Installation, Support, License, Copyright, and Disclaimer.
 
 ## Latest Version
-Version **2.2.0**: [Full changelog here](#full-changelog)
+Version **2.2.1**: [Full changelog here](#full-changelog)
 
 ## Workflow
 <p align="center"><img width="700px" src="img/pbsv-stage-workflow.png"/></p>
@@ -185,6 +185,8 @@ The VCF call marks the most likely position and size of the inverted segment, as
 ### Translocations
 Translocations are identified using breakends of individual split reads with
 a query skip of less than `-k,--max-skip-split [100]`.
+The minimum reads that support a BND (total over all samples), can be defined
+with `--call-min-bnd-reads-all-samples [2]`.
 All four breakend combinations are supported:
 <p align="center"><img width="700px" src="img/pbsv-breakends.png"/></p>
 
@@ -281,14 +283,18 @@ it will happen that we call SVs that have support from multiple
 subreads, but all of them are from the same ZMW. In NGS you would call
 that PCR duplicates or some would refer to them as technical replicates.
 One does not want to account evidence more than once per ZMW aka per
-molecule. 
+molecule.
 The median filter picks one subread per ZMW, to be precise the subread
 of median length, to have exactly one evidence per molecule. If you
 don't use it, you will get false positive SV calls and the genotypes
 will be wrong.
 
 ## Full Changelog
- * **2.2.0**:
+ * **2.2.1**:
+   * Public release in SMRT Link 7.0.0
+   * Add `—call-min-bnd-reads-all-samples`
+
+ * 2.2.0:
    * Add duplications and copy number variations
    * Improved sensitivity for larger insertions and deletions
    * Simplified parameters and relaxed inversion calling criteria
