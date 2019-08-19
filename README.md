@@ -25,7 +25,7 @@ Please refer to our [official pbbioconda page](https://github.com/PacificBioscie
 for information on Installation, Support, License, Copyright, and Disclaimer.
 
 ## Latest Version
-Version **2.2.1**: [Full changelog here](#full-changelog)
+Version **2.2.2**: [Full changelog here](#full-changelog)
 
 ## Workflow
 <p align="center"><img width="700px" src="img/pbsv-stage-workflow.png"/></p>
@@ -290,7 +290,11 @@ don't use it, you will get false positive SV calls and the genotypes
 will be wrong.
 
 ## Full Changelog
- * **2.2.1**:
+ * **2.2.2**:
+   * Public release in SMRT Link 8.0.0
+   * Fix `--sample`, used to override input type
+
+ * 2.2.1:
    * Public release in SMRT Link 7.0.0
    * Add `—call-min-bnd-reads-all-samples`
 
