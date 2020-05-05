@@ -103,23 +103,10 @@ for i in $(samtools view -H hg38.movie1.bam | grep '^@SQ' | cut -f2 | cut -d':' 
 done
 ```
 
-#### Call SVs per chromosome
+#### Call SVs
 ```sh
-for i in {chr1,chr2,chr3,chr4,chr5,...}; do
-    pbsv call hg38.fa hg38.sample1.${i}.svsig.gz hg38.${i}.vcf
-done
-```
-Be aware that each translocation will get called twice, when run per chromosome.
-Even though the IDs will match, the `DP` information won't necessarily be identical.
-
-To avoid that, call insertions, deletions, and inversions independent from
-translocations:
-
-```sh
-for i in {chr1,chr2,chr3,chr4,chr5,...}; do
-    pbsv call --types INS,DEL,INV,DUP,CNV hg38.fa hg38.sample1.${i}.svsig.gz hg38.${i}.ins+del+inv.vcf
-done
-pbsv call --types BND hg38.fa hg38.sample1.*.svsig.gz hg38.bnd.vcf
+# -j is number of threads
+pbsv call -j 8 hg38.fa hg38.sample1.*.svsig.gz hg38.sample1.vcf
 ```
 
 ## Algorithm Overview and Advanced Parameters
