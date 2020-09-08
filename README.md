@@ -214,14 +214,15 @@ with `SHADOW`.
 ### Calling and Genotyping
 An variant is output if it passes all of the following criteria:
 * supported by at least `-A,--call-min-reads-all-samples [2]` reads total across samples,
-* supported by at least `-O,--call-min-reads-one-samples [2]` in a sample,
-* supported by at least `-S,--call-min-read-per-one-sample [20]` percent of reads in a sample,
-* supported by at least `-P,--call-min-reads-per-strand-all-samples [1]` reads per strand total across samples,
+* supported by at least `-B,--call-min-bnd-reads-all-samples [2]` reads total across samples for BND variants,
+* supported by at least `-O,--call-min-reads-one-sample [2]` in a sample,
+* supported by at least `-P,--call-min-read-perc-one-sample [20]` percent of reads in a sample,
+* supported by at least `-S,--call-min-reads-per-strand-all-samples [1]` reads per strand total across samples,
 * assigned a non-reference genotype in at least one sample;
   a sample is assigned a non-reference genotype for a variant if at least `--gt-min-reads [1]` reads
   support the variant.
 
-For CCS input, using the `--ccs` mode in `pbsv call`, thresholds are relaxed to `-A 1 -O 1 -S 0 -P 10`.
+For CCS input, using the `--ccs` mode in `pbsv call`, thresholds are relaxed to `-A 1 -B 2 -O 1 -S 0 -P 10`.
 
 ### Filtering
 The VCF filter column is
