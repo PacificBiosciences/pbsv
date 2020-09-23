@@ -25,7 +25,7 @@ Please refer to our [official pbbioconda page](https://github.com/PacificBioscie
 for information on Installation, Support, License, Copyright, and Disclaimer.
 
 ## Latest Version
-Version **2.3.0**: [Full changelog here](#full-changelog)
+Version **2.4.0**: [Full changelog here](#full-changelog)
 
 ## Workflow
 <p align="center"><img width="700px" src="img/pbsv-stage-workflow.png"/></p>
@@ -277,8 +277,20 @@ of median length, to have exactly one evidence per molecule. If you
 don't use it, you will get false positive SV calls and the genotypes
 will be wrong.
 
+### Why does the VCF contain no ambiguous IUPAC REF codes?
+Starting with version 2.4.0, `pbsv` constrains all bases in the reference to be
+A,C,T,G,N. Bases unknown (e.g. IUPAC) will be automatically converted to N.
+Toggling `--preserve-non-acgt` will retain non A,C,T,G,N bases in the reference.
+
 ## Full Changelog
- * **2.3.0**:
+ * **2.4.0**:
+   * Ensure identical output for one giant or multiple small svsig files as inputs
+   * Add `--preserve-non-acgt`
+   * Fix a problem where signatures in `call` were dropped before target window
+   * Support non-spanning inversions
+   * Use incremental VCF ids
+
+ * 2.3.0:
    * Public release in SMRT Link 9.0.0
    * New CLI UX
    * Change svsig compression to bgzip to enable indexing via tabix
