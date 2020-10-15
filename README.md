@@ -284,6 +284,7 @@ Toggling `--preserve-non-acgt` will retain non A,C,T,G,N bases in the reference.
 
 ## Full Changelog
  * **2.4.0**:
+   * Public release in SMRT Link 10.0.0
    * Ensure identical output for one giant or multiple small svsig files as inputs
    * Add `--preserve-non-acgt`
    * Fix a problem where signatures in `call` were dropped before target window
