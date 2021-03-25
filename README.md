@@ -25,7 +25,7 @@ Please refer to our [official pbbioconda page](https://github.com/PacificBioscie
 for information on Installation, Support, License, Copyright, and Disclaimer.
 
 ## Latest Version
-Version **2.4.0**: [Full changelog here](#full-changelog)
+Version **2.4.1**: [Full changelog here](#full-changelog)
 
 ## Workflow
 <p align="center"><img width="700px" src="img/pbsv-stage-workflow.png"/></p>
@@ -283,7 +283,13 @@ A,C,T,G,N. Bases unknown (e.g. IUPAC) will be automatically converted to N.
 Toggling `--preserve-non-acgt` will retain non A,C,T,G,N bases in the reference.
 
 ## Full Changelog
- * **2.4.0**:
+ * **2.4.1**:
+    * Better break-end (BND) specificity, fewer false positive calls
+    * Improved VCF formatting, addition of SVLEN to inversions
+    * Alignment filtering based on gap compressed identity
+    * Filtering contained inverted supplementary alignments
+    
+ * 2.4.0:
    * Public release in SMRT Link 10.0.0
    * Ensure identical output for one giant or multiple small svsig files as inputs
    * Add `--preserve-non-acgt`
