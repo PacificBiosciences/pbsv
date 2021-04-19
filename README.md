@@ -288,7 +288,7 @@ Toggling `--preserve-non-acgt` will retain non A,C,T,G,N bases in the reference.
     * Increased insertion genotyping accuracy 
     * The addition of alignment spans to svsig files
 
- * 2.4.1*:
+ * 2.4.1:
     * Better break-end (BND) specificity, fewer false positive calls
     * Improved VCF formatting, addition of SVLEN to inversions
     * Alignment filtering based on gap compressed identity `--min-gap-comp-id-perc`
