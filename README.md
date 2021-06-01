@@ -25,7 +25,7 @@ Please refer to our [official pbbioconda page](https://github.com/PacificBioscie
 for information on Installation, Support, License, Copyright, and Disclaimer.
 
 ## Latest Version
-Version **2.4.1**: [Full changelog here](#full-changelog)
+Version **2.6.2**: [Full changelog here](#full-changelog)
 
 ## Workflow
 <p align="center"><img width="700px" src="img/pbsv-stage-workflow.png"/></p>
@@ -283,7 +283,10 @@ A,C,T,G,N. Bases unknown (e.g. IUPAC) will be automatically converted to N.
 Toggling `--preserve-non-acgt` will retain non A,C,T,G,N bases in the reference.
 
 ## Full Changelog
- * **2.6.0**:
+ * **2.6.2**:
+    * Fix: Truncate long svsig lines
+ 
+ * 2.6.0:
     * Increased insertion sensitivity 
     * Increased insertion genotyping accuracy 
     * The addition of alignment spans to svsig files
