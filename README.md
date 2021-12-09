@@ -197,20 +197,6 @@ and labeled as a duplication if it matches the reference with 80%.
 **Caution:** Activating duplication calling has a negative impact when comparing
 to GIAB, as GIAB labels everything as insertion or deletion.
 
-### Copy number variations
-Copy number variations (CNVs) are inferred from breakends.
-Each breakend pair is tested for significant changes in the read depth signal
-and for each breakend, the longest non-overlapping CNV is being reported.
-
-The minimum length can be configured in `pbsv discover`
-
-```
-  --min-cnv-length    Ignore CNVs with length < N bp. ["1K"]
-```
-
-CNVs that are overlapping with or are encapsulated by a deletion are flagged
-with `SHADOW`.
-
 ### Calling and Genotyping
 An variant is output if it passes all of the following criteria:
 * supported by at least `-A,--call-min-reads-all-samples [2]` reads total across samples,
