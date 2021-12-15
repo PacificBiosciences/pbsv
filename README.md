@@ -271,15 +271,15 @@ Toggling `--preserve-non-acgt` will retain non A,C,T,G,N bases in the reference.
 ## Full Changelog
 
 **2.8.0**: 09 September 2021
-  * Deprecate copy number variation calling.
+    * Deprecate copy number variation calling.
 
  * 2.7.1:
-  * Fix END info field for inversions.
+    * Fix END info field for inversions.
 
  * 2.7.0: 
-  * Add HiFi preset to 'discover'
-  * Change default values for '--call-min-reads-all-samples' and '--call-min-reads-one-sample' options
-  * Handle '#' header lines in BED input files.
+    * Add HiFi preset to 'discover'
+    * Change default values for '--call-min-reads-all-samples' and '--call-min-reads-one-sample' options
+    * Handle '#' header lines in BED input files.
 
  * 2.6.2:
     * Fix: Truncate long svsig lines
