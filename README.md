@@ -270,7 +270,7 @@ Toggling `--preserve-non-acgt` will retain non A,C,T,G,N bases in the reference.
 
 ## Full Changelog
 
-**2.8.0**: 09 September 2021
+**2.8.0**:
     * Deprecate copy number variation calling.
 
  * 2.7.1:
