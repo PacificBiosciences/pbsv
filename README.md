@@ -68,6 +68,10 @@ to calling structural variants. The signatures are stored in a `.svsig.gz` file.
 ```sh
 pbsv discover ref.movie1.bam ref.sample1.svsig.gz
 pbsv discover ref.movie2.bam ref.sample2.svsig.gz
+
+# optionally index svsig.gz to allow random access via `pbsv call -r`
+tabix -c '#' -s 3 -b 4 -e 4 ref.sample1.svsig.gz
+tabix -c '#' -s 3 -b 4 -e 4 ref.sample2.svsig.gz
 ```
 
 It is highly recommended to provide one tandem repeat annotation `.bed` file
