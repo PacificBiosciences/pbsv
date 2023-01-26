@@ -25,7 +25,7 @@ Please refer to our [official pbbioconda page](https://github.com/PacificBioscie
 for information on Installation, Support, License, Copyright, and Disclaimer.
 
 ## Latest Version
-Version **2.6.2**: [Full changelog here](#full-changelog)
+Version **2.8.0**: [Full changelog here](#full-changelog)
 
 ## Workflow
 <p align="center"><img width="700px" src="img/pbsv-stage-workflow.png"/></p>
@@ -152,7 +152,7 @@ The explicit upper limit on the insertion size can be adjusted in `pbsv call`,
 but be aware that predicting larger insertions will consume more memory!
 
 ```
-  --max-ins-length   Ignore insertions with length > N bp. ["10K"]
+  --max-ins-length   Ignore insertions with length > N bp. ["15K"]
 ```
 
 ### Inversions
@@ -192,7 +192,7 @@ otherwise, it is filtered with **NotFullySpanned**.
 The maximum size can be configures in `pbsv call`:
 
 ```
-  --max-dup-length   Ignore duplications with length > N bp. ["100K"]
+  --max-dup-length   Ignore duplications with length > N bp. ["1M"]
 ```
 
 #### From insertion
@@ -203,16 +203,16 @@ to GIAB, as GIAB labels everything as insertion or deletion.
 
 ### Calling and Genotyping
 An variant is output if it passes all of the following criteria:
-* supported by at least `-A,--call-min-reads-all-samples [2]` reads total across samples,
-* supported by at least `-B,--call-min-bnd-reads-all-samples [2]` reads total across samples for BND variants,
-* supported by at least `-O,--call-min-reads-one-sample [2]` in a sample,
-* supported by at least `-P,--call-min-read-perc-one-sample [20]` percent of reads in a sample,
-* supported by at least `-S,--call-min-reads-per-strand-all-samples [1]` reads per strand total across samples,
+* supported by at least `-A,--call-min-reads-all-samples [3]` reads total across samples,
+* supported by at least `-O,--call-min-reads-one-samples [3]` in a sample,
+* supported by at least `-S,--call-min-read-per-one-sample [1]` percent of reads in a sample,
+* supported by at least `-B,--call-min-bnd-reads-all-samples [2]` reads total across samples for BNDs,
+* supported by at least `-P,--call-min-reads-per-strand-all-samples [20]` reads per strand total across samples,
 * assigned a non-reference genotype in at least one sample;
   a sample is assigned a non-reference genotype for a variant if at least `--gt-min-reads [1]` reads
   support the variant.
 
-For CCS input, using the `--ccs` mode in `pbsv call`, thresholds are relaxed to `-A 1 -B 2 -O 1 -S 0 -P 10`.
+For CCS input, using the `--ccs` mode in `pbsv call`, thresholds are relaxed to `-A 3 -B 2 -O 3 -S 0 -P 10`.
 
 ### Filtering
 The VCF filter column is
@@ -274,31 +274,25 @@ Toggling `--preserve-non-acgt` will retain non A,C,T,G,N bases in the reference.
 
 ## Full Changelog
 
- * *2.8.0**:
-    * Deprecate copy number variation calling.
+ * **2.8.0**:
+   * Deprecate copy number variation calling.
 
  * 2.7.1:
-    * Fix END info field for inversions.
+   * Fix END info field for inversions.
 
- * 2.7.0: 
-    * Add HiFi preset to 'discover'
-    * Change default values for `--call-min-reads-all-samples` and `--call-min-reads-one-sample` options
-    * Handle '#' header lines in BED input files.
+ * 2.7.0:
+   * Add HiFi preset to 'discover'
+   * Change default values for --call-min-reads-all-samples and --call-min-reads-one-sample options
+   * Handle '#' header lines in BED input files.
 
  * 2.6.2:
-    * Fix: Truncate long svsig lines
- 
- * 2.6.0:
-    * Increased insertion sensitivity 
-    * Increased insertion genotyping accuracy 
-    * The addition of alignment spans to svsig files
+   * Fix: Truncate long svsig lines
 
  * 2.4.1:
-    * Better break-end (BND) specificity, fewer false positive calls
-    * Improved VCF formatting, addition of SVLEN to inversions
-    * Alignment filtering based on gap compressed identity `--min-gap-comp-id-perc`
-    * Filtering contained inverted supplementary alignments
-    
+   * Increased specificity for BNDs
+   * Added field to svsig file
+   * Modified depth logic for edge case
+
  * 2.4.0:
    * Public release in SMRT Link 10.0.0
    * Ensure identical output for one giant or multiple small svsig files as inputs
@@ -318,7 +312,7 @@ Toggling `--preserve-non-acgt` will retain non A,C,T,G,N bases in the reference.
 
  * 2.2.1:
    * Public release in SMRT Link 7.0.0
-   * Add `-—call-min-bnd-reads-all-samples`
+   * Add `—call-min-bnd-reads-all-samples`
 
  * 2.2.0:
    * Add duplications and copy number variations
