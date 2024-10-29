@@ -25,7 +25,7 @@ Please refer to our [official pbbioconda page](https://github.com/PacificBioscie
 for information on Installation, Support, License, Copyright, and Disclaimer.
 
 ## Latest Version
-Version **2.9.0**: [Full changelog here](#full-changelog)
+Version **2.10.0**: [Full changelog here](#full-changelog)
 
 ## Workflow
 <p align="center"><img width="700px" src="img/pbsv-stage-workflow.png"/></p>
@@ -274,7 +274,10 @@ Toggling `--preserve-non-acgt` will retain non A,C,T,G,N bases in the reference.
 
 ## Full Changelog
 
- * **2.9.0**:
+ * **2.10.0**:
+   * SMRT Link 25.1 release
+
+ * 2.9.0:
    * Update `--min-mapq` to 5
    * Allow spaces in sample name
 
