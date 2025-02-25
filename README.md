@@ -274,7 +274,10 @@ Toggling `--preserve-non-acgt` will retain non A,C,T,G,N bases in the reference.
 
 ## Full Changelog
 
- * **2.10.0**:
+ * **2.11.0**:
+   * Support ultra-high memory Linux systems
+
+ * 2.10.0:
    * SMRT Link 25.1 release
 
  * 2.9.0:
